@@ -2,7 +2,11 @@ from datetime import datetime
 from hashlib import md5
 
 from flask_login import UserMixin
+from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
+from wtforms.fields.simple import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Length
+
 from app import login
 
 from app import db
@@ -46,3 +50,9 @@ class Post(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+# 个人资料编辑器
+class EditProfileForm(FlaskForm):
+    username = StringField('Username',validators=[DataRequired()])
+    about_me = TextAreaField('About_me',validators=[Length(max=140)])
+    submit = SubmitField('Submit')
