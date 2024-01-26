@@ -8,7 +8,7 @@ from app.forms import LoginForm, RegistrationForm
 from flask import render_template, flash, redirect, url_for, request
 
 from app.models import User
-
+from datetime import datetime
 
 @app.route('/')
 @app.route('/index')
@@ -88,3 +88,10 @@ def user(username):
         {'author':user,'body':'Hello World! Test post #3'}
     ]
     return render_template('user.html',user=user,posts=posts)
+
+# 为每个视图函数添加更新"用户的最后访问时间"这个字段
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()

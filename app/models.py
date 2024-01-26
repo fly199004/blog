@@ -1,4 +1,6 @@
 from datetime import datetime
+from hashlib import md5
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login
@@ -12,6 +14,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -21,6 +25,12 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    # 新增的`avatar()`方法需要传入需求头像的像素大小，并返回用户头像图片的URL
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return ('https://www.gravatar.com/avatar/{}?d=identicon&s={}'.
+                format(digest,size))
 
 
 class Post(db.Model):
